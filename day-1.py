@@ -225,45 +225,6 @@ def find_sum_target(values, target, combo_num):
         if sum(x) == target:
             return prod(x)
 
+
 # find_sum_target(values, target, 3)
 # print(find_sum_target(values, target, 3))
-
-# part to refined
-def find_sum_target_next(values, target, combo_num):
-    return next(prod(x) for x in combinations(values, r=combo_num) if sum(x) == target)
-
-
-
-# values_list = [1, 2, 2, 3]
-# values_set = set(values_list)
-
-# print("values_list", values_list)
-# print("values_set", values_set)
-
-# list_combinations = set(combinations(values_list, 2))
-# set_combinations = set(combinations(values_set, 2))
-
-# print("list_combinations", list_combinations)
-# print("set_combinations", set_combinations)
-
-# assert list_combinations == set_combinations, "missing combinations detected"
-
-
-
-
-
-
-# from itertools import product, combinations
-
-# values_list = [1, 2, 2, 3]
-# values_set = set(values_list)
-
-# # print("values_list", values_list)
-# # print("values_set", values_set)
-
-# # product_list = set(product(values_list, values_list))
-# product_set = set(product(values_set, values_set))
-# list_combinations = set((combinations(values_list, 2)))
-
-# print("product_set", product_set)
-# print("list_combinations", list_combinations)
