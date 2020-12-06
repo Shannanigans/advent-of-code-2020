@@ -1,3 +1,6 @@
+from itertools import combinations
+from math import prod
+
 values = [
     1028,
     1987,
@@ -201,10 +204,11 @@ values = [
     1932,
 ]
 
-
 target = 2020
 
-# part one
+"""
+part one
+"""
 # def find_sum_target(values, target):
 #     for first in values:
 #         for second in values:
@@ -215,9 +219,9 @@ target = 2020
 # print(find_sum_target(values, target))
 
 
-# part two
-from itertools import combinations
-from math import prod
+"""
+part two
+"""
 
 
 def find_sum_target(values, target, combo_num):
