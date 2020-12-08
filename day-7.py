@@ -16,7 +16,7 @@ multi_replace = lambda string, char_list: reduce(
 )
 
 
-def get_map():
+def get_edge_map():
     all_maps = {}
     for x in get_data_string():
         key, values_string = x.split("contain")
@@ -28,18 +28,24 @@ def get_map():
     return all_maps
 
 
-def build_tree(rule_map, key, result={}):
-    result[key] = rule_map[key]
-    for child in result[key]:
-        if child:
-            result[key][child] = build_tree(rule_map, child, result[key])
-        else:
-            result[key] = None
-    return result[key]
+def search(edge_map, key, target="shiny gold", found=false):
+    def _search(edge_map, key, result={}):
+        result[key] = edge_map[key]
+        found = not found and key == target
+        for child in result[key]:
+            if child:
+                result[key][child] = _search(edge_map, child, result[key])
+            else:
+                result[key] = None
+        return result[key]
+
+    return {key: _search(edge_map, key)}
 
 
-pprint(build_tree(get_map(), "light salmon"))
+# search(get_edge_map(), "light salmon")
+# pprint(search(get_edge_map(), "light salmon"))
 
-# for item in get_map():
-#     print(build_tree(get_map(), item))
-# pprint(build_tree(get_map(), item))
+for item in get_edge_map():
+    search(get_edge_map(), item)
+    # print(search(get_edge_map(), item))
+    # pprint(search(get_edge_map(), item))
