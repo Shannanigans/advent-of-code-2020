@@ -28,10 +28,9 @@ def get_edge_map():
     return all_maps
 
 
-def search(edge_map, key, target="shiny gold", found=false):
+def search(edge_map, key, target="shiny gold"):
     def _search(edge_map, key, result={}):
         result[key] = edge_map[key]
-        found = not found and key == target
         for child in result[key]:
             if child:
                 result[key][child] = _search(edge_map, child, result[key])
@@ -45,7 +44,9 @@ def search(edge_map, key, target="shiny gold", found=false):
 # search(get_edge_map(), "light salmon")
 # pprint(search(get_edge_map(), "light salmon"))
 
-for item in get_edge_map():
-    search(get_edge_map(), item)
-    # print(search(get_edge_map(), item))
-    # pprint(search(get_edge_map(), item))
+edge_map = get_edge_map()
+
+for item in edge_map:
+    # search(edge_map, item)
+    # print(search(edge_map, item))
+    pprint(search(edge_map, item))
