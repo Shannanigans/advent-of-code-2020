@@ -28,25 +28,47 @@ def get_edge_map():
     return all_maps
 
 
-def search(edge_map, key, target="shiny gold"):
-    def _search(edge_map, key, result={}):
+def build_graph(edge_map, key, target="shiny gold"):
+    """
+    Debug tool
+    """
+
+    def _build_graph(edge_map, key, result={}):
         result[key] = edge_map[key]
         for child in result[key]:
             if child:
-                result[key][child] = _search(edge_map, child, result[key])
-            else:
-                result[key] = None
+                result[key][child] = _build_graph(edge_map, child, result[key])
         return result[key]
 
-    return {key: _search(edge_map, key)}
+    return {key: _build_graph(edge_map, key)}
 
 
-# search(get_edge_map(), "light salmon")
-# pprint(search(get_edge_map(), "light salmon"))
+def search(edge_map, key, target, result=False):
+    result = result if result else key == target
+    for child in edge_map[key]:
+        if child:
+            child_result = search(edge_map, child, target, result)
+            result = result if result else child_result
+    return result
 
-edge_map = get_edge_map()
 
-for item in edge_map:
-    # search(edge_map, item)
-    # print(search(edge_map, item))
-    pprint(search(edge_map, item))
+def get_product_count(edge_map, key, result=0):
+    for child in edge_map[key]:
+        if child:
+            result += edge_map[key][child] * get_product_count(edge_map, child, 1)
+    return result
+
+
+def get_target_count(edge_map, target):
+    target_set = {item for item in edge_map if search(edge_map, item, target)}
+    return len(target_set) - 1
+
+
+# debug
+# pprint(build_graph(get_edge_map(), "light salmon"))
+
+# Part 1
+print(get_target_count(get_edge_map(), "shiny gold"))
+
+# Part 2
+print(get_product_count(get_edge_map(), "shiny gold"))
