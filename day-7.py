@@ -29,9 +29,7 @@ def get_edge_map():
 
 
 def build_graph(edge_map, key, target="shiny gold"):
-    """
-    Debug tool
-    """
+    """Debug tool"""
 
     def _build_graph(edge_map, key, result={}):
         result[key] = edge_map[key]
