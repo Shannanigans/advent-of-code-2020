@@ -60,4 +60,5 @@ for new_instructions in mod_instructions_generator:
     accumulator, status = process_instructions(
         new_instructions, index=0, accumulator=0, index_history=[]
     )
-    print(status, accumulator)
+    if status:
+        print(accumulator)
