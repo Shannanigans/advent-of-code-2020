@@ -20,7 +20,7 @@ def get_new_index(op, value, index, accumulator):
         return index + value, accumulator
 
 
-def process_instructions(instructions, index=0, accumulator=0, index_history=[]):
+def process_instructions(instructions, index, accumulator, index_history):
     if index in index_history:
         return (accumulator, False)
 
@@ -51,14 +51,21 @@ def mod_instructions(instructions):
 
 
 # PART 1
-# print(process_instructions(get_instructions(get_data())))
+print(
+    process_instructions(
+        instructions=get_instructions(get_data()),
+        index=0,
+        accumulator=0,
+        index_history=[],
+    )
+)
 
 # PART 2
 instructions = get_instructions(get_data())
 mod_instructions_generator = mod_instructions(instructions)
 for new_instructions in mod_instructions_generator:
     accumulator, status = process_instructions(
-        new_instructions, index=0, accumulator=0, index_history=[]
+        instructions=new_instructions, index=0, accumulator=0, index_history=[]
     )
     if status:
         print(accumulator)
