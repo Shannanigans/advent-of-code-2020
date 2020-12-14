@@ -1,6 +1,3 @@
-from functools import reduce
-
-
 def get_data(filename="day-9-data.txt"):
     with open(filename) as f:
         return list(map(lambda x: int(x), f.readlines()))
