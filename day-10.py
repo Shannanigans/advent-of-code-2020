@@ -106,4 +106,23 @@ def get_combination(
 #     "result: ",
 #     get_combination(test_data, index=0, combination=[0]),
 # )
-print("result: ", get_combination(get_data(), index=0, combination=[0]))
+# RIP
+# print("result: ", get_combination(get_data(), index=0, combination=[0]))
+
+from collections import defaultdict
+from functools import reduce
+
+
+def get_combinations_part_2_2(data, combinations=defaultdict(int)):
+    combinations[0] = 1
+    data = [0, *data, data[-1] + 3]
+    for item in data:
+        for offset in range(1, 4):
+            next_item = item + offset
+            if next_item in data:
+                combinations[next_item] += combinations[item]
+    return combinations[max(data)]
+
+
+# print(get_combinations_part_2_2(test_data_small))
+print(get_combinations_part_2_2(test_data))
