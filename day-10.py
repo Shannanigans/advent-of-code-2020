@@ -125,4 +125,5 @@ def get_combinations_part_2_2(data, combinations=defaultdict(int)):
 
 
 # print(get_combinations_part_2_2(test_data_small))
-print(get_combinations_part_2_2(test_data))
+# print(get_combinations_part_2_2(test_data))
+print(get_combinations_part_2_2(get_data()))
