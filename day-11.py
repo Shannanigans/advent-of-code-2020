@@ -2,12 +2,6 @@ from pprint import pprint
 from functools import reduce, partial
 import copy
 
-
-def get_data(filename="day-11-data.txt"):
-    with open(filename) as f:
-        return preprocess(f.readlines())
-
-
 test_data = [
     "L.LL.LL.LL",
     "LLLLLLL.LL",
@@ -35,10 +29,20 @@ test_final_world = [
 ]
 
 
+def get_data(filename="day-11-data.txt"):
+    with open(filename) as f:
+        return preprocess(f.readlines())
+
+
+# ensure data list of lists
 def preprocess(x):
     return list(map(list, x))
 
 
+# Walk/view functions
+# -----------------------------------------
+
+# find world limits (should be cached)
 def get_limits(world):
     y_limit = len(world)
     x_limit = len(world[0])
@@ -46,25 +50,27 @@ def get_limits(world):
 
 
 # moves
-move_down = lambda x, y: (x, y + 1)
 move_up = lambda x, y: (x, y - 1)
+move_down = lambda x, y: (x, y + 1)
 move_right = lambda x, y: (x + 1, y)
 move_left = lambda x, y: (x - 1, y)
 
 # can moves
-can_down = lambda x, y, y_limit: y + 1 < y_limit
 can_up = lambda x, y: y - 1 >= 0
+can_down = lambda x, y, y_limit: y + 1 < y_limit
 can_right = lambda x, y, x_limit: x + 1 < x_limit
 can_left = lambda x, y: x - 1 >= 0
 get_can_down = lambda y_limit: partial(can_down, y_limit=y_limit)
 get_can_right = lambda x_limit: partial(can_right, x_limit=x_limit)
 
 
-def direction_compose(world, x, y, directions):
-    x, y = reduce(lambda result, func: func(result[0], result[1]), directions, (x, y))
+# performs non safe moves
+def direction_compose(world, x, y, moves):
+    x, y = reduce(lambda result, func: func(result[0], result[1]), moves, (x, y))
     return world[y][x], x, y
 
 
+# performs safe walk via `cans` in `moves` directions
 def walk(world, x, y, cans, moves):
     can_pass = reduce(
         lambda result, can: False if not result or not can(x, y) else True, cans, True
@@ -80,6 +86,7 @@ def walk(world, x, y, cans, moves):
         return walk(world, next_x, next_y, cans, moves)
 
 
+# get all relevant view characters for a given position
 def get_views(world, x, y):
     x_limit, y_limit = get_limits(world)
     views = []
@@ -98,6 +105,7 @@ def get_views(world, x, y):
     return views
 
 
+# get all relevant adjacent characters for a given position
 def get_adjacent(world, x, y):
     x_limit, y_limit = get_limits(world)
     adjacent = []
@@ -123,10 +131,11 @@ def get_adjacent(world, x, y):
     return adjacent
 
 
+# World char composable functions
+# -----------------------------------------
+
+# Every seat in the example layout becomes occupied
 def init(world, x, y):
-    """
-    After one round of these rules, every seat in the example layout becomes occupied
-    """
     char = world[y][x]
     return "#" if char == "L" else char
 
@@ -160,14 +169,8 @@ def log_char(target_x, target_y):
     return _log_char
 
 
-def process_world(world, process_func):
-    new_world = copy.deepcopy(world)
-    for y, row in enumerate(world):
-        for x, char in enumerate(row):
-            new_world[y][x] = process_func(world, x, y)
-    return new_world
-
-
+# World composable functions
+# -----------------------------------------
 def get_occupied(world):
     return len([char for row in world for char in row if char == "#"])
 
@@ -177,17 +180,17 @@ def log_occupied(world):
     return world
 
 
-def stabilized_gate(world):
+def get_stabilized_gate(world):
     state = dict(last_occupied=0)
 
-    def _stabilized_gate(world):
+    def stabilized_gate(world):
         # not returning world ends execution
         occupied = get_occupied(world)
         if occupied != state["last_occupied"]:
             state["last_occupied"] = occupied
             return world
 
-    return _stabilized_gate
+    return stabilized_gate
 
 
 def log_world(world):
@@ -196,15 +199,29 @@ def log_world(world):
     return world
 
 
+# World processing functions
+# -----------------------------------------
+def process_world(world, process_func):
+    new_world = copy.deepcopy(world)
+    for y, row in enumerate(world):
+        for x, char in enumerate(row):
+            new_world[y][x] = process_func(world, x, y)
+    return new_world
+
+
 def multi_process_world(world, operations):
     return reduce(lambda result, func: func(result), operations, world)
 
 
+# composable operation partial helpers
 process_init = partial(process_world, process_func=init)
 process_vacate_or_occupy = partial(process_world, process_func=vacate_or_occupy)
 process_vacate_or_occupy_view = partial(
     process_world, process_func=views_vacate_or_occupy_partial
 )
+
+# Implementation
+# -----------------------------------------
 
 # TEST DATA
 # world = preprocess(test_data)
@@ -232,11 +249,11 @@ process_vacate_or_occupy_view = partial(
 
 def find_stabilization(process_func=process_vacate_or_occupy):
     world = process_init(get_data())
-    _stabilized_gate = stabilized_gate(world)
+    stabilized_gate = get_stabilized_gate(world)
     while world:
         world = process_func(world)
         log_occupied(world)
-        world = _stabilized_gate(world)
+        world = stabilized_gate(world)
 
 
 # PART ONE
@@ -244,4 +261,5 @@ def find_stabilization(process_func=process_vacate_or_occupy):
 
 
 # PART TWO
-find_stabilization(process_vacate_or_occupy_view)
+find_stabilization(process_vacate_or_occupy_view)  # 1937
+
