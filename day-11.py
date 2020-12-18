@@ -45,44 +45,81 @@ def get_limits(world):
     return x_limit, y_limit
 
 
+# moves
 move_down = lambda x, y: (x, y + 1)
 move_up = lambda x, y: (x, y - 1)
 move_right = lambda x, y: (x + 1, y)
 move_left = lambda x, y: (x - 1, y)
 
+# can moves
+can_down = lambda x, y, y_limit: y + 1 < y_limit
+can_up = lambda x, y: y - 1 >= 0
+can_right = lambda x, y, x_limit: x + 1 < x_limit
+can_left = lambda x, y: x - 1 >= 0
+get_can_down = lambda y_limit: partial(can_down, y_limit=y_limit)
+get_can_right = lambda x_limit: partial(can_right, x_limit=x_limit)
+
 
 def direction_compose(world, x, y, directions):
     x, y = reduce(lambda result, func: func(result[0], result[1]), directions, (x, y))
-    return world[y][x]
+    return world[y][x], x, y
+
+
+def walk(world, x, y, cans, moves):
+    can_pass = reduce(
+        lambda result, can: False if not result or not can(x, y) else True, cans, True
+    )
+    if can_pass:
+        char, next_x, next_y = direction_compose(world, x, y, moves)
+    else:
+        return None
+
+    if char == "#" or char == "L":
+        return char
+    else:
+        return walk(world, next_x, next_y, cans, moves)
+
+
+def get_views(world, x, y):
+    x_limit, y_limit = get_limits(world)
+    views = []
+    can_down = get_can_down(y_limit)
+    can_right = get_can_right(x_limit)
+
+    views.append(walk(world, x, y, [can_up], [move_up]))
+    views.append(walk(world, x, y, [can_right], [move_right]))
+    views.append(walk(world, x, y, [can_down], [move_down]))
+    views.append(walk(world, x, y, [can_left], [move_left]))
+    views.append(walk(world, x, y, [can_up, can_right], [move_up, move_right]))
+    views.append(walk(world, x, y, [can_up, can_left], [move_up, move_left]))
+    views.append(walk(world, x, y, [can_down, can_right], [move_down, move_right]))
+    views.append(walk(world, x, y, [can_down, can_left], [move_down, move_left]))
+
+    return views
 
 
 def get_adjacent(world, x, y):
     x_limit, y_limit = get_limits(world)
     adjacent = []
-    down = y + 1 < y_limit
-    up = y - 1 >= 0
-    right = x + 1 < x_limit
-    left = x - 1 >= 0
-    # print("x_limit, y_limit", x_limit, y_limit, x, y)
-    # print(up, right, down, left)
+    can_down = get_can_down(y_limit)
+    can_right = get_can_right(x_limit)
 
-    if up:
-        adjacent.append(direction_compose(world, x, y, [move_up]))
-    if down:
-        adjacent.append(direction_compose(world, x, y, [move_down]))
-    if right:
-        adjacent.append(direction_compose(world, x, y, [move_right]))
-    if left:
-        adjacent.append(direction_compose(world, x, y, [move_left]))
-    if up and right:
-        adjacent.append(direction_compose(world, x, y, [move_up, move_right]))
-    if up and left:
-        adjacent.append(direction_compose(world, x, y, [move_up, move_left]))
-    if down and right:
-        adjacent.append(direction_compose(world, x, y, [move_down, move_right]))
-    if down and left:
-        adjacent.append(direction_compose(world, x, y, [move_down, move_left]))
-
+    if can_up(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_up])[0])
+    if can_down(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_down])[0])
+    if can_right(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_right])[0])
+    if can_left(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_left])[0])
+    if can_up(x, y) and can_right(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_up, move_right])[0])
+    if can_up(x, y) and can_left(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_up, move_left])[0])
+    if can_down(x, y) and can_right(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_down, move_right])[0])
+    if can_down(x, y) and can_left(x, y):
+        adjacent.append(direction_compose(world, x, y, [move_down, move_left])[0])
     return adjacent
 
 
@@ -94,23 +131,22 @@ def init(world, x, y):
     return "#" if char == "L" else char
 
 
-def vacate_or_occupy(world, x, y):
+def vacate_or_occupy(
+    world, x, y, view_func=get_adjacent, vacate_limit=4, occupy_limit=0
+):
     char = world[y][x]
     if char == "#":
-        """
-        vacate
-        If a seat is occupied (#) and four or more seats adjacent to it are also
-        occupied, the seat becomes empty. Otherwise, the seat's state does not change.
-        """
-        char = "L" if get_adjacent(world, x, y).count("#") >= 4 else char
+        """vacate"""
+        char = "L" if view_func(world, x, y).count("#") >= vacate_limit else char
     if char == "L":
-        """
-        occupy
-        If a seat is empty (L) and there are no occupied seats adjacent to it, the
-        seat becomes occupied.
-        """
-        char = "#" if get_adjacent(world, x, y).count("#") == 0 else char
+        """occupy"""
+        char = "#" if view_func(world, x, y).count("#") == occupy_limit else char
     return char
+
+
+views_vacate_or_occupy_partial = partial(
+    vacate_or_occupy, view_func=get_views, vacate_limit=5
+)
 
 
 def log_char(target_x, target_y):
@@ -147,7 +183,6 @@ def stabilized_gate(world):
     def _stabilized_gate(world):
         # not returning world ends execution
         occupied = get_occupied(world)
-        # print("_stabilized_gate", occupied, state["last_occupied"])
         if occupied != state["last_occupied"]:
             state["last_occupied"] = occupied
             return world
@@ -167,6 +202,9 @@ def multi_process_world(world, operations):
 
 process_init = partial(process_world, process_func=init)
 process_vacate_or_occupy = partial(process_world, process_func=vacate_or_occupy)
+process_vacate_or_occupy_view = partial(
+    process_world, process_func=views_vacate_or_occupy_partial
+)
 
 # TEST DATA
 # world = preprocess(test_data)
@@ -192,14 +230,18 @@ process_vacate_or_occupy = partial(process_world, process_func=vacate_or_occupy)
 # assert final_world == preprocess(test_final_world)
 
 
-# PART ONE
-def part_one():
+def find_stabilization(process_func=process_vacate_or_occupy):
     world = process_init(get_data())
     _stabilized_gate = stabilized_gate(world)
     while world:
-        world = process_vacate_or_occupy(world)
+        world = process_func(world)
         log_occupied(world)
         world = _stabilized_gate(world)
 
 
-part_one()
+# PART ONE
+# find_stabilization()  # 2152
+
+
+# PART TWO
+find_stabilization(process_vacate_or_occupy_view)
