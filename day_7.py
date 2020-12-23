@@ -2,7 +2,7 @@ from functools import reduce
 from pprint import pprint
 
 
-def get_data_string(filename="day-7-data.txt"):
+def get_data_string(filename="day_7_data.txt"):
     for line in open(filename, "r"):
         yield line.strip()
 

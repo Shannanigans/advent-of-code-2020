@@ -2,7 +2,7 @@ from math import prod
 from pprint import pprint
 
 
-def get_data(filename="day-10-data.txt"):
+def get_data(filename="day_10_data.txt"):
     with open(filename) as f:
         data = list(map(lambda x: int(x), f.readlines()))
         data.sort()

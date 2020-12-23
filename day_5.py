@@ -44,7 +44,7 @@ def get_seat_id(full_address):
     return row * 8 + col
 
 
-def get_address(filename="day-5-data.txt"):
+def get_address(filename="day_5_data.txt"):
     for line in open(filename, "r"):
         yield line.strip()
 

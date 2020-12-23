@@ -31,7 +31,7 @@ def extract_line_values(line):
     return min_limit, max_limit, target_char, text
 
 
-def part_one_get_valid_count(filename="day-2-data.txt"):
+def part_one_get_valid_count(filename="day_2_data.txt"):
     valid_count = 0
     with open(filename) as f:
         line = f.readline()
@@ -69,7 +69,7 @@ def is_valid(first_location_present, second_location_present):
     )
 
 
-def part_two_get_valid_count(filename="day-2-data.txt"):
+def part_two_get_valid_count(filename="day_2_data.txt"):
     valid_count = 0
     with open(filename) as f:
         line = f.readline()

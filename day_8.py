@@ -1,4 +1,4 @@
-def get_data(filename="day-8-data.txt"):
+def get_data(filename="day_8_data.txt"):
     for line in open(filename, "r"):
         yield line.strip()
 

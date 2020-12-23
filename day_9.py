@@ -1,4 +1,4 @@
-def get_data(filename="day-9-data.txt"):
+def get_data(filename="day_9_data.txt"):
     with open(filename) as f:
         return list(map(lambda x: int(x), f.readlines()))
 

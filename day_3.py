@@ -1,4 +1,4 @@
-def get_world(filename="day-3-data.txt"):
+def get_world(filename="day_3_data.txt"):
     with open(filename) as f:
         return list(map(lambda x: x.strip(), f.readlines()))
 

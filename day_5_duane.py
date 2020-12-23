@@ -1,4 +1,4 @@
-with open("day-5-data.txt", "r") as file:
+with open("day_5_data.txt", "r") as file:
     raw = file.read().strip()
 
 print("raw", raw)

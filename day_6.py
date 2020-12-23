@@ -1,7 +1,7 @@
 from functools import reduce
 
 
-def get_collection_string(filename="day-6-data.txt"):
+def get_collection_string(filename="day_6_data.txt"):
     collection = ""
     for line in open(filename, "r"):
         if line == "\n":

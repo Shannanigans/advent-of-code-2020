@@ -3,7 +3,7 @@ from functools import reduce, partial
 import copy
 
 
-def get_data(filename="day-11-data.txt"):
+def get_data(filename="day_11_data.txt"):
     with open(filename) as f:
         return preprocess(f.readlines())
 
